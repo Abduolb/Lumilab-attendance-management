@@ -33,7 +33,7 @@
         .mt-4 { margin-top: 1rem; }
         .mb-4 { margin-bottom: 1rem; }
         
-        /* --- Login Screen --- */
+        /* --- Login/Signup Screen --- */
         .login-wrapper {
             height: 100vh;
             display: flex;
@@ -42,26 +42,46 @@
             background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
         }
 
-        .login-card {
+        .auth-card {
             background: white;
             padding: 2.5rem;
             border-radius: 12px;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 400px;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .brand-logo {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: 700;
             color: var(--primary);
             margin-bottom: 2rem;
             text-align: center;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 10px;
         }
+
+        .auth-switch {
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+        .auth-switch span {
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .auth-switch span:hover { text-decoration: underline; }
 
         /* --- Form Elements --- */
         .form-group { margin-bottom: 1.25rem; }
@@ -146,6 +166,7 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
+            flex-shrink: 0;
         }
 
         /* Main Content */
@@ -268,12 +289,14 @@
         <span id="toastMessage">Action Successful</span>
     </div>
 
-    <div id="loginPage" class="login-wrapper">
-        <div class="login-card">
+    <div id="authPage" class="login-wrapper">
+        
+        <div id="loginCard" class="auth-card">
             <div class="brand-logo">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                LUMILAB ATTENDANCE MANAGEMENT
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                LUMILAB ATTENDANCE
             </div>
+            <h3 style="text-align: center; margin-bottom: 1.5rem;">Sign In</h3>
             <div class="form-group">
                 <label>Username</label>
                 <input type="text" id="username" placeholder="e.g. employee1">
@@ -283,19 +306,53 @@
                 <input type="password" id="password" placeholder="••••••••">
             </div>
             <button class="btn btn-primary" onclick="handleLogin()">Sign In</button>
-            <p style="margin-top: 1rem; font-size: 0.8rem; color: #64748b; text-align: center;">
-                <strong></strong><br>
-                <br>
             
-            </p>
+            <div class="auth-switch">
+                Don't have an account? <span onclick="toggleAuth('signup')">Sign Up</span>
+            </div>
         </div>
+
+        <div id="signupCard" class="auth-card hidden">
+            <div class="brand-logo">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                LUMILAB ATTENDANCE MANAGEMENT
+            </div>
+            <h3 style="text-align: center; margin-bottom: 1.5rem;">Create Account</h3>
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="regName" placeholder="John Doe">
+            </div>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="regUser" placeholder="johndoe">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="regPass" placeholder="••••••••">
+            </div>
+            <div class="form-group">
+                <label>Role</label>
+                <select id="regRole">
+                    <option value="NJFP">NJFP</option>
+                    <option value="Employee">Employee</option>
+                    <option value="Intern">Intern</option>
+                    <option value="Admin">Admin</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="handleRegister()">Create Account</button>
+            
+            <div class="auth-switch">
+                Already have an account? <span onclick="toggleAuth('login')">Sign In</span>
+            </div>
+        </div>
+
     </div>
 
     <div id="appContainer" class="app-container hidden">
         <aside class="sidebar">
-            <div class="brand-logo" style="justify-content: flex-start;">
+            <div class="brand-logo" style="justify-content: flex-start; flex-direction: row; font-size: 1rem;">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                LUMILAB ATTENDANCE MANAGEMENT
+                LUMILAB
             </div>
             
             <ul class="nav-menu">
@@ -316,7 +373,7 @@
             <div class="user-profile">
                 <div class="avatar" id="userAvatar">JD</div>
                 <div>
-                    <div style="font-weight: 600; font-size: 0.9rem;" id="userNameDisplay">John Doe</div>
+                    <div style="font-weight: 600; font-size: 0.9rem;" id="userNameDisplay">username</div>
                     <div style="font-size: 0.75rem; color: var(--text-muted);" id="userRoleDisplay">Software Engineer</div>
                 </div>
                 <button class="btn" style="margin-left: auto; padding: 5px;" onclick="logout()" title="Logout">
@@ -488,8 +545,8 @@
     <script>
         // --- 1. CONFIGURATION & DATA ---
         
-        // HARDCODED USERS FOR AUTHENTICATION
-        const USERS = [
+        // DEFAULT USERS (If storage is empty)
+        const DEFAULT_USERS = [
             { id: 1, username: 'Yusuf hamisu', password: 'admin123', name: 'System Admin', role: 'Admin' },
             { id: 2, username: 'Ag', password: 'pass123', name: 'Abdulganiyu ahmad balele', role: 'NJFP' },
             { id: 3, username: 'Abdullahi murtala', password: 'pass123', name: 'Abdullahi murtala', role: 'NJFP' }
@@ -498,26 +555,77 @@
         let currentUser = null;
         
         // Initialize Data in LocalStorage if empty
+        if (!localStorage.getItem('users_db')) {
+            localStorage.setItem('users_db', JSON.stringify(DEFAULT_USERS));
+        }
         if (!localStorage.getItem('attendance_db')) localStorage.setItem('attendance_db', JSON.stringify([]));
         if (!localStorage.getItem('leaves_db')) localStorage.setItem('leaves_db', JSON.stringify([]));
 
         // --- 2. AUTHENTICATION LOGIC ---
 
+        function toggleAuth(view) {
+            if (view === 'signup') {
+                document.getElementById('loginCard').classList.add('hidden');
+                document.getElementById('signupCard').classList.remove('hidden');
+            } else {
+                document.getElementById('signupCard').classList.add('hidden');
+                document.getElementById('loginCard').classList.remove('hidden');
+            }
+        }
+
+        function handleRegister() {
+            const name = document.getElementById('regName').value;
+            const user = document.getElementById('regUser').value;
+            const pass = document.getElementById('regPass').value;
+            const role = document.getElementById('regRole').value;
+
+            if (!name || !user || !pass) {
+                showToast('Please fill all fields', 'error');
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem('users_db'));
+            if (users.find(u => u.username === user)) {
+                showToast('Username already taken', 'error');
+                return;
+            }
+
+            const newUser = {
+                id: Date.now(),
+                username: user,
+                password: pass,
+                name: name,
+                role: role
+            };
+
+            users.push(newUser);
+            localStorage.setItem('users_db', JSON.stringify(users));
+            showToast('Account created! Please Sign In.');
+            
+            // Clear form and switch to login
+            document.getElementById('regName').value = '';
+            document.getElementById('regUser').value = '';
+            document.getElementById('regPass').value = '';
+            toggleAuth('login');
+        }
+
         function handleLogin() {
             const userIn = document.getElementById('username').value;
             const passIn = document.getElementById('password').value;
 
-            const validUser = USERS.find(u => u.username === userIn && u.password === passIn);
+            // Load latest users from storage
+            const users = JSON.parse(localStorage.getItem('users_db'));
+            const validUser = users.find(u => u.username === userIn && u.password === passIn);
 
             if (validUser) {
                 currentUser = validUser;
-                document.getElementById('loginPage').classList.add('hidden');
+                document.getElementById('authPage').classList.add('hidden');
                 document.getElementById('appContainer').classList.remove('hidden');
                 
                 // Set Profile Info
                 document.getElementById('userNameDisplay').textContent = currentUser.name;
                 document.getElementById('userRoleDisplay').textContent = currentUser.role;
-                document.getElementById('userAvatar').textContent = currentUser.name.split(' ').map(n=>n[0]).join('');
+                document.getElementById('userAvatar').textContent = currentUser.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
 
                 showToast(`Welcome back, ${currentUser.name}!`);
                 loadDashboard();
@@ -529,7 +637,7 @@
 
         function logout() {
             currentUser = null;
-            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('authPage').classList.remove('hidden');
             document.getElementById('appContainer').classList.add('hidden');
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
