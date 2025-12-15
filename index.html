@@ -241,6 +241,7 @@
         .badge-danger { background: #fee2e2; color: #991b1b; }
         .badge-warning { background: #fef3c7; color: #92400e; }
         .badge-neutral { background: #f1f5f9; color: #475569; }
+        .badge-primary { background: #eff6ff; color: #1e40af; }
 
         /* Toast Notification */
         .toast {
@@ -293,7 +294,7 @@
         
         <div id="loginCard" class="auth-card">
             <div class="brand-logo">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                <img src="/lumilab logo.jpg" alt="">
                 LUMILAB ATTENDANCE
             </div>
             <h3 style="text-align: center; margin-bottom: 1.5rem;">Sign In</h3>
@@ -315,12 +316,12 @@
         <div id="signupCard" class="auth-card hidden">
             <div class="brand-logo">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                LUMILAB ATTENDANCE MANAGEMENT
+                LUMILAB ATTENDANCE
             </div>
             <h3 style="text-align: center; margin-bottom: 1.5rem;">Create Account</h3>
             <div class="form-group">
                 <label>Full Name</label>
-                <input type="text" id="regName" placeholder="Full Name">
+                <input type="text" id="regName" placeholder="Full name">
             </div>
             <div class="form-group">
                 <label>Username</label>
@@ -351,8 +352,8 @@
     <div id="appContainer" class="app-container hidden">
         <aside class="sidebar">
             <div class="brand-logo" style="justify-content: flex-start; flex-direction: row; font-size: 1rem;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                LUMILAB
+            <img src="/lumilab logo.jpg" alt="">
+            
             </div>
             
             <ul class="nav-menu">
@@ -367,6 +368,9 @@
                 </li>
                 <li class="nav-item">
                     <a href="#" class="nav-link" onclick="navigate('reports')">Reports</a>
+                </li>
+                <li class="nav-item hidden" id="nav-admin">
+                    <a href="#" class="nav-link" onclick="navigate('admin')">Admin Panel</a>
                 </li>
             </ul>
 
@@ -432,7 +436,7 @@
                             </tr>
                         </thead>
                         <tbody id="recentActivityTable">
-                            </tbody>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -534,7 +538,48 @@
                             </tr>
                         </thead>
                         <tbody id="reportTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="view-admin" class="view-section hidden">
+                <div class="header">
+                    <h2>Admin Panel</h2>
+                    <p>Overview of organization activities and requests.</p>
+                </div>
+
+                <h3 class="mb-4">Manage Leave Requests</h3>
+                <div class="table-container mb-4">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Leave Details</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminLeaveTable">
                             </tbody>
+                    </table>
+                </div>
+
+                <h3 class="mb-4 mt-4">Employee Activity Logs</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Role</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminActivityTable">
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -547,7 +592,7 @@
         
         // DEFAULT USERS (If storage is empty)
         const DEFAULT_USERS = [
-            { id: 1, username: 'Yusuf hamisu', password: 'admin123', name: 'System Admin', role: 'Admin' },
+            { id: 1, username: 'admin', password: 'admin123', name: 'System Admin', role: 'Admin' },
             { id: 2, username: 'Ag', password: 'pass123', name: 'Abdulganiyu ahmad balele', role: 'NJFP' },
             { id: 3, username: 'Abdullahi murtala', password: 'pass123', name: 'Abdullahi murtala', role: 'NJFP' }
         ];
@@ -627,6 +672,13 @@
                 document.getElementById('userRoleDisplay').textContent = currentUser.role;
                 document.getElementById('userAvatar').textContent = currentUser.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
 
+                // CHECK ADMIN ROLE
+                if (currentUser.role === 'Admin') {
+                    document.getElementById('nav-admin').classList.remove('hidden');
+                } else {
+                    document.getElementById('nav-admin').classList.add('hidden');
+                }
+
                 showToast(`Welcome back, ${currentUser.name}!`);
                 loadDashboard();
                 startClock();
@@ -641,6 +693,8 @@
             document.getElementById('appContainer').classList.add('hidden');
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
+            // Hide admin panel link on logout
+            document.getElementById('nav-admin').classList.add('hidden');
         }
 
         // --- 3. NAVIGATION LOGIC ---
@@ -656,10 +710,15 @@
             
             // Highlight nav item (simple loop matching)
             const links = document.querySelectorAll('.nav-link');
+            // Assuming order: Dash, Att, Leaves, Reports, Admin
             if(viewName === 'dashboard') links[0].classList.add('active');
             if(viewName === 'attendance') { links[1].classList.add('active'); updateTodayLogs(); }
             if(viewName === 'leaves') { links[2].classList.add('active'); loadLeaveHistory(); }
             if(viewName === 'reports') { links[3].classList.add('active'); loadReports(); }
+            if(viewName === 'admin') { 
+                links[4].classList.add('active'); 
+                loadAdminPanel(); 
+            }
         }
 
         // --- 4. CORE FUNCTIONALITY ---
@@ -773,6 +832,7 @@
             tbody.innerHTML = myLeaves.map(l => {
                 let statusClass = 'badge-neutral';
                 if(l.status === 'Approved') statusClass = 'badge-success';
+                if(l.status === 'Rejected') statusClass = 'badge-danger';
                 if(l.status === 'Pending') statusClass = 'badge-warning';
 
                 return `
@@ -816,7 +876,127 @@
             `}).join('');
         }
 
-        // --- 6. UTILITIES ---
+        // --- 6. ADMIN PANEL LOGIC ---
+
+        function loadAdminPanel() {
+            if(currentUser.role !== 'Admin') {
+                showToast("Access Denied", "error");
+                navigate('dashboard');
+                return;
+            }
+
+            // Load Activities
+            loadAdminActivities();
+            // Load Leaves
+            loadAdminLeaves();
+        }
+
+        function loadAdminActivities() {
+            const attendanceDb = JSON.parse(localStorage.getItem('attendance_db')) || [];
+            const usersDb = JSON.parse(localStorage.getItem('users_db')) || [];
+
+            // Sort by timestamp descending
+            const sortedActivities = [...attendanceDb].sort((a, b) => b.timestamp - a.timestamp);
+            const tbody = document.getElementById('adminActivityTable');
+            
+            if (sortedActivities.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No activities found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = sortedActivities.map(act => {
+                const user = usersDb.find(u => u.id === act.userId);
+                const userName = user ? user.name : 'Unknown User';
+                const userRole = user ? user.role : '-';
+                let badgeClass = act.type === 'Check In' ? 'badge-primary' : 'badge-warning';
+
+                return `
+                <tr>
+                    <td>
+                        <div style="font-weight:600;">${userName}</div>
+                    </td>
+                    <td><span class="badge badge-neutral">${userRole}</span></td>
+                    <td>${act.date}</td>
+                    <td><span class="badge ${badgeClass}">${act.type}</span></td>
+                    <td>${act.time}</td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        function loadAdminLeaves() {
+            const leavesDb = JSON.parse(localStorage.getItem('leaves_db')) || [];
+            const usersDb = JSON.parse(localStorage.getItem('users_db')) || [];
+            const tbody = document.getElementById('adminLeaveTable');
+
+            // Sort: Pending first, then by ID
+            const sortedLeaves = [...leavesDb].sort((a, b) => {
+                if (a.status === 'Pending' && b.status !== 'Pending') return -1;
+                if (a.status !== 'Pending' && b.status === 'Pending') return 1;
+                return b.id - a.id;
+            });
+
+            if (sortedLeaves.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No leave requests found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = sortedLeaves.map(leave => {
+                const user = usersDb.find(u => u.id === leave.userId);
+                const userName = user ? user.name : 'Unknown User';
+                
+                // Determine Badge Color
+                let statusClass = 'badge-neutral';
+                if(leave.status === 'Approved') statusClass = 'badge-success';
+                if(leave.status === 'Rejected') statusClass = 'badge-danger';
+                if(leave.status === 'Pending') statusClass = 'badge-warning';
+
+                // Determine Action Buttons (Only show for Pending)
+                let actionButtons = '-';
+                if (leave.status === 'Pending') {
+                    actionButtons = `
+                        <div class="flex" style="gap: 10px;">
+                            <button class="badge badge-success" style="border:none; cursor:pointer;" onclick="processLeave(${leave.id}, 'Approved')">Accept</button>
+                            <button class="badge badge-danger" style="border:none; cursor:pointer;" onclick="processLeave(${leave.id}, 'Rejected')">Reject</button>
+                        </div>
+                    `;
+                }
+
+                return `
+                <tr>
+                    <td>
+                        <div style="font-weight:600;">${userName}</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted);">ID: ${leave.userId}</div>
+                    </td>
+                    <td>
+                        <div style="font-weight:600;">${leave.type}</div>
+                        <div style="font-size:0.8rem;">${leave.start} to ${leave.end}</div>
+                    </td>
+                    <td>${leave.reason}</td>
+                    <td><span class="badge ${statusClass}">${leave.status}</span></td>
+                    <td>${actionButtons}</td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        function processLeave(leaveId, newStatus) {
+            const leavesDb = JSON.parse(localStorage.getItem('leaves_db')) || [];
+            const leaveIndex = leavesDb.findIndex(l => l.id === leaveId);
+
+            if (leaveIndex !== -1) {
+                leavesDb[leaveIndex].status = newStatus;
+                localStorage.setItem('leaves_db', JSON.stringify(leavesDb));
+                
+                showToast(`Leave request ${newStatus}`);
+                loadAdminLeaves(); // Refresh the table
+                loadDashboard(); // Refresh stats in background
+            } else {
+                showToast("Error: Leave request not found", "error");
+            }
+        }
+
+        // --- 7. UTILITIES ---
 
         function startClock() {
             setInterval(() => {
